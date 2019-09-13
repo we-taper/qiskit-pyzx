@@ -23,4 +23,6 @@ def pyzx_optimize(circuit: qiskit.QuantumCircuit) -> qiskit.QuantumCircuit:
     # Phase 6
     pyzx_circuit = pyzx_circuit.split_phase_gates()
 
-    return qiskit.QuantumCircuit.from_qasm_str(pyzx_circuit.to_qasm())
+    result = qiskit.QuantumCircuit.from_qasm_str(pyzx_circuit.to_qasm())
+    result.name = "{}_zx_optimized".format(circuit.name)
+    return result
