@@ -15,7 +15,13 @@ def pyzx_optimize(circuit: qiskit.QuantumCircuit) -> qiskit.QuantumCircuit:
     pyzx_circuit = pyzx_circuit.to_basic_gates()
 
     # Phase 4
-    pyzx_circuit = pyzx.optimize.basic_optimization(pyzx_circuit)
+    try:
+        # First try including the phase polynomial optimizer
+        pyzx_circuit = pyzx.optimize.full_optimize(pyzx_circuit)
+    except TypeError:
+        # The phase polynomial optimizer only works on Clifford+T circuits.
+        # Fall back to the basic optimizer
+        pyzx_circuit = pyzx.optimize.basic_optimization(pyzx_circuit)
 
     # Phase 5
     pyzx_circuit = pyzx_circuit.to_basic_gates()
