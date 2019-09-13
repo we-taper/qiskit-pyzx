@@ -1,6 +1,6 @@
 from collections import OrderedDict
 
-from qiskit.circuit import QuantumCircuit
+from qiskit.circuit import QuantumCircuit, Measure
 from qiskit.circuit import ClassicalRegister
 from qiskit.circuit import QuantumRegister
 from qiskit.dagcircuit import DAGCircuit
@@ -32,9 +32,6 @@ def dag_to_pyzx_circuit(dag: DAGCircuit):
         qreg_to_pyreg_range[qreg.name] = tot_qb_count
         tot_qb_count += qreg.size
 
-    if len(dag.cregs.values()) != 0:
-        raise NotImplementedError(f"Classical registers is currently not supported by PyZX")
-
     name = dag.name or None
     gates = []
 
@@ -46,12 +43,14 @@ def dag_to_pyzx_circuit(dag: DAGCircuit):
         if node.condition is not None:
             raise NotImplementedError(f"Classical control is not supported by PyZX")
         inst = node.op
-        print(qubits)
-        print(repr(inst))
-        # gates.append(to_pyzx_gate(inst, qubits))
+        try:
+            to_pyzx_gate(inst, qubits, gates)
+        except NotImplementedError:
+            if isinstance(inst, Measure):
+                raise NotImplementedError('Wait for the dummy node.')
+            else:
+                raise
 
-    # circuit = Circuit(tot_qb_count, name='')
-    # circuit.gates = gates
-    # return circuit
-    print(qreg_to_pyreg_range)
-    print(pyreg_range_to_qreg)
+    circuit = Circuit(tot_qb_count, name='')
+    circuit.gates = gates
+    return circuit, qreg_to_pyreg_range, pyreg_range_to_qreg

@@ -10,5 +10,5 @@ circ.cx(q[0], q[1])
 circ.rz(0.5, q[1])
 circ.h(q2[0])
 dag = circuit_to_dag(circ)
-dag_to_pyzx_circuit(dag)
+ret = dag_to_pyzx_circuit(dag)
 
