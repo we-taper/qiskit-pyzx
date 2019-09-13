@@ -3,7 +3,6 @@ from math import pi
 
 import pyzx.circuit.gates as pyzx_g
 import qiskit.extensions.standard as qk_g
-from qiskit.circuit.measure import Measure
 
 
 # from .barrier import Barrier
@@ -111,7 +110,8 @@ def to_pyzx_gate_9(qiskit_gate, targets, gatelist: list):
 @to_pyzx_gate.register(qk_g.RXGate)
 def to_pyzx_gate_9(qiskit_gate: qk_g.RXGate, targets, gatelist: list):
     gatelist.append(
-        pyzx_g.XPhase(target=targets[0], phase=qiskit_gate.params[0]))
+        pyzx_g.XPhase(target=targets[0],
+                      phase=get_angle(qiskit_gate.params[0])))
 
 
 @to_pyzx_gate.register(qk_g.RYGate)
@@ -119,7 +119,8 @@ def to_pyzx_gate_9(qiskit_gate: qk_g.RYGate, targets, gatelist: list):
     # YRot = SRx(theta)Sdg
     gatelist.extend([
         pyzx_g.S(target=targets[0]),
-        pyzx_g.XPhase(target=targets[0], phase=qiskit_gate.params[0]),
+        pyzx_g.XPhase(target=targets[0],
+                      phase=get_angle(qiskit_gate.params[0])),
         pyzx_g.S(target=targets[0], adjoint=True),
     ])
 
@@ -127,5 +128,13 @@ def to_pyzx_gate_9(qiskit_gate: qk_g.RYGate, targets, gatelist: list):
 @to_pyzx_gate.register(qk_g.RZGate)
 def to_pyzx_gate_9(qiskit_gate: qk_g.RZGate, targets, gatelist: list):
     gatelist.append(
-        pyzx_g.ZPhase(target=targets[0], phase=qiskit_gate.params[0]))
+        pyzx_g.ZPhase(target=targets[0],
+                      phase=get_angle(qiskit_gate.params[0])))
 
+
+def get_angle(angle):
+    # 1. qiskit stores angle in Sympy.Float, which is not allowed by PyZX
+    # 2. angle in pyZX is in ratios of pi
+    angle = float(angle)
+    angle /= pi
+    return angle
