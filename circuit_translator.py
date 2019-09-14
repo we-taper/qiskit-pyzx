@@ -132,10 +132,14 @@ def to_pyzx_gate_9(qiskit_gate: qk_g.RZGate, targets, gatelist: list, **kwargs):
         pyzx_g.ZPhase(target=targets[0],
                       phase=get_angle(qiskit_gate.params[0])))
 
-@to_pyzx_gate.register(qk_g.RZGate)
+@to_pyzx_gate.register(Measure)
 def to_pyzx_gate_9(qiskit_gate: Measure, targets, gatelist: list, **kwargs):
     clbits = kwargs['clbits']
-    # TODO(Elias)
+    # TODO classically controlled measurement?
+    stored_data = {'clbits': clbits}
+    gatelist.append(
+        pyzx_g.Nonunitary(target=targets[0],
+                          stored_data=stored_data))
 
 
 def get_angle(angle):
@@ -167,6 +171,8 @@ def check_classical_control(
     if control is None:
         return False
     else:
-        pass
-        # TODO(Elias), append a dummy classical control gate to the gatelist
+        stored_data = {'gate': qiskit_gate, 'control': control}
+        gatelist.append(
+            pyzx_g.Nonunitary(target=targets[0],
+                              stored_data=stored_data))
         return True
