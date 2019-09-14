@@ -7,7 +7,8 @@ from qiskit.circuit import ClassicalRegister, QuantumCircuit, QuantumRegister, \
     Qubit
 from qiskit.dagcircuit import DAGCircuit
 
-from circuit_translator import check_classical_control, to_pyzx_gate
+from circuit_translator import check_classical_control, to_pyzx_gate, \
+    add_non_unitary_gate
 
 Translated = namedtuple(
     'Translated', ['circuit',
@@ -75,21 +76,6 @@ def dag_to_pyzx_circuit(dag: DAGCircuit):
     return Translated(
         circuit, qreg_to_pyreg_range, pyreg_range_to_qreg,
         list(qregs.values()), list(cregs.values()))
-
-
-def add_non_unitary_gate(
-        gate: pyzx.gates.Gate,
-        pyreg_to_qubit: Dict[int, Qubit],
-        dagcircuit: DAGCircuit):
-    if not isinstance(gate, pyzx.gates.Nonunitary):
-        return False
-    dagcircuit.apply_operation_back(
-        op= # qiskit gate,
-        qargs=[pyreg_to_qubit[target] for target in gate.target],
-        cargs=gate.stored_data['clbits'],
-        condition=gate.stored_data['control'],
-    )
-    return True
 
 
 def pyzx_circ_to_dag(

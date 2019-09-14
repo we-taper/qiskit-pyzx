@@ -1,10 +1,11 @@
 from functools import singledispatch
 from math import pi
+from typing import Dict
 
 import pyzx.circuit.gates as pyzx_g
 import qiskit.extensions.standard as qk_g
-from qiskit.circuit import Measure
-
+from qiskit.circuit import Measure, Qubit
+import pyzx
 
 # from .barrier import Barrier
 # from .cswap import FredkinGate
@@ -19,6 +20,7 @@ from qiskit.circuit import Measure
 # from .u1 import U1Gate
 # from .u2 import U2Gate
 # from .u3 import U3Gate
+from qiskit.dagcircuit import DAGCircuit
 
 
 @singledispatch
@@ -176,3 +178,20 @@ def check_classical_control(
             pyzx_g.Nonunitary(target=targets[0],
                               stored_data=stored_data))
         return True
+
+
+
+
+def add_non_unitary_gate(
+        gate: pyzx.gates.Gate,
+        pyreg_to_qubit: Dict[int, Qubit],
+        dagcircuit: DAGCircuit):
+    if not isinstance(gate, pyzx.gates.Nonunitary):
+        return False
+    dagcircuit.apply_operation_back(
+        op=None,# should be the qiskit gate,
+        qargs=[pyreg_to_qubit[target] for target in gate.target],
+        cargs=gate.stored_data['clbits'],
+        condition=gate.stored_data['control'],
+    )
+    return True
