@@ -188,9 +188,16 @@ def add_non_unitary_gate(
         dagcircuit: DAGCircuit):
     if not isinstance(gate, pyzx.gates.Nonunitary):
         return False
+    qargs = [pyreg_to_qubit[gate.target]]
+    if hasattr(gate, 'control'):
+        qargs.insert(0, gate.control)
+    if hasattr(gate, 'ctrl2'):
+        qargs.insert(0, gate.ctrl1)
+    if hasattr(gate, 'ctrl1'):
+        qargs.insert(0, gate.ctrl1)
     dagcircuit.apply_operation_back(
-        op=None,# should be the qiskit gate,
-        qargs=[pyreg_to_qubit[target] for target in gate.target],
+        op=gate.stored_data['gate'],
+        qargs=qargs,
         cargs=gate.stored_data['clbits'],
         condition=gate.stored_data['control'],
     )
