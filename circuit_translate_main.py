@@ -9,6 +9,7 @@ from qiskit.dagcircuit import DAGCircuit
 
 from circuit_translator import check_classical_control, to_pyzx_gate, \
     add_non_unitary_gate
+from circuit_translator_help2 import add_normal_gate
 
 Translated = namedtuple(
     'Translated', ['circuit',
@@ -100,3 +101,5 @@ def pyzx_circ_to_dag(
             pass
         else:
             add_normal_gate(gate, pyreg_to_qubit, dagcircuit)
+
+    return dagcircuit
