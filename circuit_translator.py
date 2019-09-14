@@ -134,6 +134,12 @@ def to_pyzx_gate_9(qiskit_gate: qk_g.RZGate, targets, gatelist: list, **kwargs):
         pyzx_g.ZPhase(target=targets[0],
                       phase=get_angle(qiskit_gate.params[0])))
 
+@to_pyzx_gate.register(qk_g.U3Gate)
+def to_pyzx_gate_9(qiskit_gate: qk_g.RZGate, targets, gatelist: list, **kwargs):
+    gatelist.append(
+        pyzx_g.U3(target=targets[0],
+                  phases=list(map(get_angle, qiskit_gate.params))))
+
 @to_pyzx_gate.register(Measure)
 def to_pyzx_gate_9(qiskit_gate: Measure, targets, gatelist: list, **kwargs):
     clbits = kwargs['clbits']
