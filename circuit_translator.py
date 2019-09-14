@@ -144,3 +144,29 @@ def get_angle(angle):
     angle = float(angle)
     angle /= pi
     return angle
+
+
+def check_classical_control(
+        qiskit_gate, targets, gatelist: list, **kwargs):
+    """
+    Check for classical control for this gate.
+    If there is a classical control, it appneds the gatelist with a dummy gate for this classical control, and then return True.
+
+    If not, then this function returns False.
+
+    :param qiskit_gate: The qiskit gate.
+    :param targets: A list of integers.
+        The target qregs of this quantum gate.
+    :param gatelist: The list of gates for PyZX's Circuit
+    :param kwargs: contains,
+        clbits (Qiskit's clbits)
+        condition: A tuple: (ClassicalRegister, int index)
+    :return: bool
+    """
+    control = kwargs['condition']
+    if control is None:
+        return False
+    else:
+        pass
+        # TODO(Elias), append a dummy classical control gate to the gatelist
+        return True

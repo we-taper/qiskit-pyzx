@@ -1,12 +1,10 @@
 from collections import OrderedDict
 
-from qiskit.circuit import QuantumCircuit, Measure
-from qiskit.circuit import ClassicalRegister
-from qiskit.circuit import QuantumRegister
-from qiskit.dagcircuit import DAGCircuit
 from pyzx.circuit import Circuit
+from qiskit.circuit import ClassicalRegister, QuantumCircuit, QuantumRegister
+from qiskit.dagcircuit import DAGCircuit
 
-from circuit_translator import to_pyzx_gate
+from circuit_translator import check_classical_control, to_pyzx_gate
 
 
 def dag_to_pyzx_circuit(dag: DAGCircuit):
@@ -20,7 +18,7 @@ def dag_to_pyzx_circuit(dag: DAGCircuit):
     """
     # In Qiskit, the quantum registers can have many diff names, whereas in PyZX circuit, there is only one global qubits.
     # We need a mapping from the global qubits back to the named qubits
-    pyreg_range_to_qreg = dict()  #map the start idx of the named qreg to the name
+    pyreg_range_to_qreg = dict()  # map the start idx of the named qreg to the name
     qreg_to_pyreg_range = dict()  # maps the qreg name to the start idx of global qreg
     tot_qb_count = 0
 
@@ -37,7 +35,6 @@ def dag_to_pyzx_circuit(dag: DAGCircuit):
         creg_tmp = ClassicalRegister(creg.size, name=creg.name)
         cregs[creg.name] = creg_tmp
 
-
     name = dag.name or None
     gates = []
 
@@ -53,11 +50,15 @@ def dag_to_pyzx_circuit(dag: DAGCircuit):
         for clbit in node.cargs:
             clbits.append(cregs[clbit.register.name][clbit.index])
 
-
         # if node.condition is not None:
         #     raise NotImplementedError(f"Classical control is not supported by PyZX")
         inst = node.op
-        to_pyzx_gate(inst, qubits, gates, clbits=clbits)
+        if check_classical_control(inst, qubits, gates,
+                                   clbits=clbits, condition=node.condition):
+            pass
+        else:
+            to_pyzx_gate(inst, qubits, gates,
+                         clbits=clbits, condition=node.condition)
 
     circuit = Circuit(tot_qb_count, name='')
     circuit.gates = gates
