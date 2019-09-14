@@ -4,7 +4,7 @@ from typing import Dict
 
 import pyzx.circuit.gates as pyzx_g
 import qiskit.extensions.standard as qk_g
-from qiskit.circuit import Measure, Qubit
+from qiskit.circuit import Measure, Qubit, Reset
 import pyzx
 
 # from .barrier import Barrier
@@ -138,7 +138,14 @@ def to_pyzx_gate_9(qiskit_gate: qk_g.RZGate, targets, gatelist: list, **kwargs):
 def to_pyzx_gate_9(qiskit_gate: Measure, targets, gatelist: list, **kwargs):
     clbits = kwargs['clbits']
     # TODO classically controlled measurement?
-    stored_data = {'clbits': clbits}
+    stored_data = {'clbits': clbits, 'gate': qiskit_gate}
+    gatelist.append(
+        pyzx_g.Nonunitary(target=targets[0],
+                          stored_data=stored_data))
+
+@to_pyzx_gate.register(Reset)
+def to_pyzx_gate_9(qiskit_gate: Reset, targets, gatelist: list, **kwargs):
+    stored_data = {'gate': qiskit_gate}
     gatelist.append(
         pyzx_g.Nonunitary(target=targets[0],
                           stored_data=stored_data))
@@ -198,7 +205,7 @@ def add_non_unitary_gate(
     dagcircuit.apply_operation_back(
         op=gate.stored_data['gate'],
         qargs=qargs,
-        cargs=gate.stored_data['clbits'],
-        condition=gate.stored_data['control'],
+        cargs=gate.stored_data.get('clbits'),
+        condition=gate.stored_data.get('control'),
     )
     return True
