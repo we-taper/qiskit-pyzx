@@ -1,9 +1,11 @@
 import qiskit
 import pyzx
 
-def pyzx_optimize(circuit: qiskit.QuantumCircuit) -> qiskit.QuantumCircuit:
-    parser = pyzx.circuit.qasmparser.QASMParser()
-    pyzx_graph = parser.parse(circuit.qasm()).to_graph()
+from qiskit.converters import circuit_to_dag, dag_to_circuit
+from circuit_translate_main import dag_to_pyzx_circuit, pyzx_circ_to_dag
+
+def optimize(c):
+    pyzx_graph = c.to_graph()
 
     # Phase 1
     pyzx.simplify.full_reduce(pyzx_graph)
@@ -29,6 +31,15 @@ def pyzx_optimize(circuit: qiskit.QuantumCircuit) -> qiskit.QuantumCircuit:
     # Phase 6
     pyzx_circuit = pyzx_circuit.split_phase_gates()
 
-    result = qiskit.QuantumCircuit.from_qasm_str(pyzx_circuit.to_qasm())
+    return pyzx_circuit
+
+def pyzx_optimize(circuit: qiskit.QuantumCircuit) -> qiskit.QuantumCircuit:
+    ret = dag_to_pyzx_circuit(circuit_to_dag(circuit))
+    pyzx_circuit = ret.circuit
+
+    reduced = optimize(ret.circuit)
+
+    dag = pyzx_circ_to_dag(reduced, ret)
+    result = dag_to_circuit(dag)
     result.name = "{}_zx_optimized".format(circuit.name)
     return result
