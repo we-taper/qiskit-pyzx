@@ -94,13 +94,13 @@ def to_pyzx_gate_9(qiskit_gate, targets, gatelist: list, **kwargs):
 
 @to_pyzx_gate.register(qk_g.XGate)
 def to_pyzx_gate_9(qiskit_gate, targets, gatelist: list, **kwargs):
-    gatelist.append(pyzx_g.XPhase(target=targets[0], phase=pi))
+    gatelist.append(pyzx_g.XPhase(target=targets[0], phase=1))
 
 
 @to_pyzx_gate.register(qk_g.YGate)
 def to_pyzx_gate_9(qiskit_gate, targets, gatelist: list, **kwargs):
     gatelist.extend([
-        pyzx_g.XPhase(target=targets[0], phase=pi),
+        pyzx_g.XPhase(target=targets[0], phase=1),
         pyzx_g.Z(target=targets[0])
     ])
 

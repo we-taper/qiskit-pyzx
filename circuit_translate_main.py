@@ -19,7 +19,7 @@ Translated = namedtuple(
                    ])
 
 
-def dag_to_pyzx_circuit(dag: DAGCircuit):
+def dag_to_pyzx_circuit(dag: DAGCircuit) -> Translated:
     """Build a ``QuantumCircuit`` object from a ``DAGCircuit``.
 
     Args:
@@ -88,7 +88,7 @@ def pyzx_circ_to_dag(
     # TODO(hx) Maybe we should do this inside dag_to_pyzx_circuit
     pyreg_to_qubit = dict()
     for start_idx, qreg in pyreg_range_to_qreg.items():
-        for idx in range(start_idx, qreg.size):
+        for idx in range(start_idx, start_idx + qreg.size):
             pyreg_to_qubit[idx] = qreg[idx - start_idx]
 
     [dagcircuit.add_qreg(qreg) for qreg in translated.qregs]

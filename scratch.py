@@ -4,7 +4,7 @@ import pyzx
 from qiskit import QuantumCircuit, QuantumRegister
 from qiskit.converters import *
 
-from circuit_translate_main import dag_to_pyzx_circuit
+from circuit_translate_main import dag_to_pyzx_circuit, pyzx_circ_to_dag
 
 
 def optimize(c):
@@ -38,8 +38,8 @@ def optimize(c):
 
 
 q = QuantumRegister(2, 'q')
-q2 = QuantumRegister(2, 'a')
-circ = QuantumCircuit(q, q2)
+q_a = QuantumRegister(2, 'a')
+circ = QuantumCircuit(q, q_a)
 circ.rz(0.1 * pi, q[1])
 circ.cx(q[0], q[1])
 circ.rz(0.2 * pi, q[1])
@@ -47,6 +47,21 @@ circ.cx(q[0], q[1])
 circ.rz(0.3 * pi, q[0])
 circ.rz(0.4 * pi, q[1])
 circ.cx(q[1], q[0])
+circ.h(q_a[0])
+circ.h(q_a[0])
+circ.x(q_a[0])
+circ.rx(pi, q_a[1])
+circ.ry(pi, q_a[1])
+circ.rz(0.1 * pi, q_a[1])
+print('Before circ')
+print(circ.qasm())
 dag = circuit_to_dag(circ)
 ret = dag_to_pyzx_circuit(dag)
-reduced = optimize(ret[0])
+print('pyzx circ (before opt)')
+print(ret.circuit.to_qasm())
+reduced = optimize(ret.circuit)
+print('pyzx circ (after opt)')
+print(reduced.to_qasm())
+dag_new = pyzx_circ_to_dag(reduced, ret)
+print('circ (after opt)')
+print(dag_to_circuit(dag_new).qasm())
