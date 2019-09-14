@@ -32,24 +32,32 @@ def dag_to_pyzx_circuit(dag: DAGCircuit):
         qreg_to_pyreg_range[qreg.name] = tot_qb_count
         tot_qb_count += qreg.size
 
+    cregs = OrderedDict()
+    for creg in dag.cregs.values():
+        creg_tmp = ClassicalRegister(creg.size, name=creg.name)
+        cregs[creg.name] = creg_tmp
+
+
     name = dag.name or None
     gates = []
 
     for node in dag.topological_op_nodes():
+        # collects the qregs
         qubits = [
             qreg_to_pyreg_range[qubit.register.name] + qubit.index
             for qubit in node.qargs
         ]
-        if node.condition is not None:
-            raise NotImplementedError(f"Classical control is not supported by PyZX")
+
+        # collects the cregs, which is passed (without conversion) to PyZX
+        clbits = []
+        for clbit in node.cargs:
+            clbits.append(cregs[clbit.register.name][clbit.index])
+
+
+        # if node.condition is not None:
+        #     raise NotImplementedError(f"Classical control is not supported by PyZX")
         inst = node.op
-        try:
-            to_pyzx_gate(inst, qubits, gates)
-        except NotImplementedError:
-            if isinstance(inst, Measure):
-                raise NotImplementedError('Wait for the dummy node.')
-            else:
-                raise
+        to_pyzx_gate(inst, qubits, gates, clbits=clbits)
 
     circuit = Circuit(tot_qb_count, name='')
     circuit.gates = gates
